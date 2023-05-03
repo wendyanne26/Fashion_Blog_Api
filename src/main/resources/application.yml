@@ -1,0 +1,34 @@
+server:
+  port: 8083
+application:
+  secretKey: 294A404E635266556A586E3272357538782F413F4428472B4B6150645367566B
+  expiration: 60000
+  version: v1
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:6500/secureDB
+    username:
+    password:
+  driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+      show-sql: true
+  properties:
+      hibernate:
+        format_sql: true
+        database: postgresql
+        database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+
+
+#application:
+#  version: "v1"
+
+
+#    security:
+#      jwt:
+#        secretKey: 294A404E635266556A586E3272357538782F413F4428472B4B6150645367566B
+#        expiration: 6000 # 86400000 # a day
+#        refresh-token:
+#          expiration: 60480000 # 7 days
