@@ -12,10 +12,9 @@ import lombok.*;
 public class UserDto {
     private Long id;
     @NonNull
-    private String username;
+    private String userName;
     private String password;
     @NonNull
     private String email;
-    @Enumerated(EnumType.STRING)
-    private Roles role;
+
 }

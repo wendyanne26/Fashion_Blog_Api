@@ -8,13 +8,12 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 @Service
@@ -61,7 +60,31 @@ public class JwtService {
         return extractClaims(jwtToken, Claims::getExpiration);
     }
     public String generateToken(UserDetails userDetails){
-        return generateToken(new HashMap<>(), userDetails);
+        //collections to get simple authorities
+        Collection<? extends SimpleGrantedAuthority> authorities =
+                (Collection<? extends SimpleGrantedAuthority>) userDetails.getAuthorities();
+
+        //initialize an arraylist to hold the authorities
+        List<String> authorityName = new ArrayList<>();
+        //loop through and add the simple authorities to the list
+        for(SimpleGrantedAuthority authority: authorities){
+            authorityName.add(authority.getAuthority());
+        }
+
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("authorities", authorityName);
+        return buildToken(claims, userDetails, expiration);
+    }
+
+    private String buildToken(Map<String, Object> claims, UserDetails userDetails, Long expiration) {
+        return  Jwts
+                .builder()
+                .setClaims(claims)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .setSubject(userDetails.getUsername())
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 
     public String generateToken(
@@ -73,7 +96,7 @@ public class JwtService {
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date (expiration))
+                .setExpiration(new Date (System.currentTimeMillis() + expiration))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
 

@@ -12,6 +12,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,35 +29,12 @@ public class PostController {
     public PostController(PostService postService) {
         this.postService = postService;
     }
-    @PostMapping
-    public ResponseEntity<String> createPost(
-            @RequestBody PostDto postDto,
-            HttpServletRequest servletRequest)
-    {
-        try {
-            HttpSession session = servletRequest.getSession();
-            Long id =(Long)session.getAttribute("userId");
-            Posts newPost = postService.createPost(postDto, id);
-            return new ResponseEntity<>(newPost.getTitle(), HttpStatus.CREATED);
-        } catch (CustomUserException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-    }
-    @PutMapping("/{postId}")
-    public ResponseEntity<String> updatePost(@RequestBody PostDto postDto, @PathVariable Long postId){
-        postService.updatePost(postDto,postId);
-        return  new ResponseEntity<>(postDto.getTitle(), HttpStatus.OK);
 
-    }
+
     @PostMapping("/{title}")
     public ResponseEntity<List<PostDto>> searchPost(@PathVariable String title) throws CustomUserException {
         List<PostDto>result = postService.searchPost(title);
         return  new ResponseEntity<>(result, HttpStatus.OK);
-    }
-    @DeleteMapping("/{postId}")
-    public ResponseEntity<String> deletePost(@PathVariable Long postId){
-        postService.deletePost(postId);
-        return new ResponseEntity<>("post deleted", HttpStatus.OK);
     }
 
     @GetMapping("/viewPosts")

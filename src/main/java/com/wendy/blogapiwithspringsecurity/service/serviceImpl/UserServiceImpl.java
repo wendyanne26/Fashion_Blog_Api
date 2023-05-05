@@ -11,7 +11,10 @@ import com.wendy.blogapiwithspringsecurity.repositories.TokenRepository;
 import com.wendy.blogapiwithspringsecurity.repositories.UserRepository;
 import com.wendy.blogapiwithspringsecurity.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.authenticator.SpnegoAuthenticator;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.stereotype.Service;
@@ -22,12 +25,13 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final TokenRepository tokenRepository;
-
+    private final AuthenticationManager authenticationManager;
 
 
     public Users getUser(Long id) {
@@ -62,11 +66,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public AuthenticationResponse loginUser(UserDto userDto){
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        userDto.getEmail(),
+                        userDto.getPassword()
+                )
+        );
         Users users = map2Entity(userDto);
-        Optional<Users> users1 = userRepository.findByUsername(users.getUsername());
-        String jwtToken = jwtService.generateToken(users1.get());
-        revokeAllToken(users1.get());
-        saveUserToken(users1.get(), jwtToken);
+       Users users1 =  userRepository.findByEmail(userDto.getEmail())
+               .orElseThrow();
+       log.info("========> " + userDto.getEmail());
+        String jwtToken = jwtService.generateToken(users1);
+
+        log.info("this is the user token: --------->" + jwtToken);
+        revokeAllToken(users1);
+
+        saveUserToken(users1, jwtToken);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .build();
@@ -74,6 +89,7 @@ public class UserServiceImpl implements UserService {
 
     private void revokeAllToken(Users users) {
         List<Token> tokenList = tokenRepository.findAllValidTokenByUser(users.getId());
+        log.info(users.getId()+" =====> This is the id of the user");
         if(tokenList.isEmpty()){
             return;
         }
@@ -82,6 +98,7 @@ public class UserServiceImpl implements UserService {
             token.setExpired(true);
             tokenRepository.saveAll(tokenList);
         }
+        log.info("============== Saved tokens ===============");
     }
 
     @Override
@@ -102,25 +119,23 @@ public class UserServiceImpl implements UserService {
         userDto.setId(user.getId());
         userDto.setPassword(user.getPassword());
         userDto.setEmail(user.getEmail());
-        userDto.setUsername(user.getUsername());
+        userDto.setUserName(user.getUsername());
         return userDto;
     }
 
 
     public UserDto mapToDto(Users users){
         return UserDto.builder()
-                .username(users.getUsername())
+                .userName(users.getUsername())
                 .email(users.getEmail())
                 .password(users.getPassword())
-                .role(users.getRole())
                 .build();
     }
 
     public static Users map2Entity(UserDto users){
         Users user = new Users();
         user.setId(users.getId());
-        user.setUserName(users.getUsername());
-        user.setRole(users.getRole());
+        user.setUsername(users.getUserName());
         user.setEmail(users.getEmail());
         user.setPassword(users.getPassword());
         user.setCreatedAt(LocalDateTime.now());

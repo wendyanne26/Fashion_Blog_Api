@@ -11,6 +11,8 @@ import com.wendy.blogapiwithspringsecurity.repositories.UserRepository;
 import com.wendy.blogapiwithspringsecurity.service.LikeService;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 public class LikeServiceImpl implements LikeService {
     private final LikeRepository repo;
@@ -25,18 +27,20 @@ public class LikeServiceImpl implements LikeService {
 
 
     @Override
-    public Like createLike(LikeDto likeDto, Long postId, Long userId) throws CustomUserException {
+    public Like createLike( Long postId, String request) throws CustomUserException {
         Posts posts = postRepository.findById(postId).get();
-        Users users = userRepository.findById(userId).get();
-        if(posts != null && users != null){
-            Like like = mapToLikeDto(likeDto);
+        Users users = userRepository.findByEmail(request).
+                orElseThrow();
+            Like like = new Like();
             like.setUser(users);
             like.setPost(posts);
+            like.setLiked(true);
+            like.setCreatedAt(LocalDateTime.now());
+            like.setUpdatedAt(LocalDateTime.now());
             Like newLike = repo.save(like);
             return newLike;
         }
-        throw new CustomUserException("post does not exit");
-    }
+
 
     @Override
     public void deleteLike(Long likeId) {

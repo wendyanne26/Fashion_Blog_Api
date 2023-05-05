@@ -5,7 +5,7 @@ import com.wendy.blogapiwithspringsecurity.exceptionHandler.CustomUserException;
 import com.wendy.blogapiwithspringsecurity.models.Comment;
 
 public interface CommentService {
-    Comment createComment(CommentDto commentDto, Long id, Long userId) throws CustomUserException;
+    Comment createComment(CommentDto commentDto, Long id, String request) throws CustomUserException;
 
     void deleteComment(Long commentId);
 

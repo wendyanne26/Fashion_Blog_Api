@@ -28,6 +28,9 @@ public class Posts extends AuditEntity {
     private String content;
     @Column(nullable = false)
     private String category;
+    @ManyToOne
+    @JoinColumn(referencedColumnName = "id")
+    private Users user;
     @OneToMany(mappedBy = "posts", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 

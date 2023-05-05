@@ -6,7 +6,7 @@ import com.wendy.blogapiwithspringsecurity.models.Like;
 
 public interface LikeService {
 
-    Like createLike(LikeDto likeDto, Long postId, Long userId) throws CustomUserException;
+    Like createLike(Long postId, String request) throws CustomUserException;
 
     void deleteLike(Long likeId);
 }

@@ -24,14 +24,18 @@ public class Users implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(unique = true)
-    private String userName;
+
+    private String username;
     private String password;
+    @Column(unique = true)
     private String email;
     @Enumerated(EnumType.STRING)
     private Roles role;
+
     @CreatedDate
     private LocalDateTime createdAt = LocalDateTime.now();
+    @OneToMany
+    private List<Posts> posts;
 
 
     @Override

@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api/v1/users")
+@RequestMapping("/api/v1/users")
 public class UserController {
     private final UserService userService;
     @Autowired
@@ -23,7 +23,6 @@ public class UserController {
     @PostMapping("/register")
     public AuthenticationResponse createUser(@RequestBody UserDto userDto){
         return userService.createUser(userDto);
-
     }
     @GetMapping("/{id}")
     public Users getUser(@PathVariable Long id){
@@ -33,7 +32,6 @@ public class UserController {
     @PostMapping("/login")
     public AuthenticationResponse loginUser(@RequestBody UserDto userDto)throws CustomUserException {
       return userService.loginUser(userDto);
-
     }
     @PostMapping("/register/Admin")
     public AuthenticationResponse createAdmin(@RequestBody UserDto userDto){

@@ -9,6 +9,8 @@ import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,14 +24,13 @@ public class CommentController {
     }
 
     @PostMapping("/{postId}")
-    public ResponseEntity<String> createComment(@PathVariable Long postId, @RequestBody CommentDto commentDto, HttpServletRequest request) throws CustomUserException {
-        HttpSession session = request.getSession();
-        Long userId = (Long) session.getAttribute("userId");
-        log.info("this is the user ----->:" + userId);
-        log.info("this is the post ----->:" + postId);
-        Comment newComment = service.createComment(commentDto, postId, userId);
-        HttpSession session1 = request.getSession();
-        session1.setAttribute("commentId", commentDto.getId());
+    public ResponseEntity<String> createComment(
+            @PathVariable Long postId,
+            @RequestBody CommentDto commentDto,
+            Authentication authentication) throws CustomUserException {
+
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        Comment newComment = service.createComment(commentDto, postId, userDetails.getUsername());
         return new ResponseEntity<>(newComment.getContent(), HttpStatus.CREATED);
     }
 

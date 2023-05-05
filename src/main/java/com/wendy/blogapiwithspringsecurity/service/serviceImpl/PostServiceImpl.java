@@ -12,6 +12,7 @@ import com.wendy.blogapiwithspringsecurity.service.PostService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -32,17 +33,17 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Posts createPost(PostDto postDto, Long id) throws CustomUserException {
-        log.info("this is the admin session ID: --------->" + id);
-        Users users = getCurrentUser(id);
-        if(users.getRole().equals(Roles.ADMIN)) {
-            Posts posts = mapToPosts(postDto);
-            Posts newPost = postRepository.save(posts);
-            return newPost;
-        }else{
-            throw new CustomUserException("Only an Admin can perform this function");
+    public PostDto createPost(PostDto postDto, String request){
+        Posts posts = mapToPosts(postDto);
+        Users users = userRepository.findByEmail(request)
+                .orElseThrow();
+        posts.setUser(users);
+        posts.setCreatedAt(LocalDateTime.now());
+        posts.setUpdatedAt(LocalDateTime.now());
+        postRepository.save(posts);
+        return mapToPostDto(posts);
         }
-    }
+
 
     @Override
     public void updatePost(PostDto postDto, Long postId) {
@@ -88,10 +89,10 @@ public class PostServiceImpl implements PostService {
         return postResponse;
     }
 
-    private Users getCurrentUser(Long id) {
-        Optional< Users> user = userRepository.findById(id);
-        return user.get();
-    }
+//    private Users getCurrentUser(Long id) {
+//        Optional< Users> user = userRepository.findById(id);
+//        return user.get();
+//    }
 
     private Posts mapToPosts(PostDto posts){
         Posts posts1 = new Posts();
