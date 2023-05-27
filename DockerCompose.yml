@@ -1,0 +1,31 @@
+version: '3.8'
+services:
+  db:
+    image: postgres
+    hostname: database
+    ports:
+      - "5432:5432"
+#    restart: always
+#    volumes:
+#      - data:/var/lib/postgres/data
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: secureDB
+
+  app:
+      build: .
+#      restart: always
+      environment:
+        SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/secureDB
+        SPRING_DATASOURCE_USERNAME: postgres
+        SPRING_DATASOURCE_PASSWORD: password
+      depends_on:
+        - db
+      ports:
+        - "8083:8083"
+      volumes:
+        - .:/code
+volumes:
+  data:
+
+

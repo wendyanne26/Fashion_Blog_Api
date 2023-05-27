@@ -6,13 +6,13 @@ application:
   version: v1
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:6500/secureDB
-    username:
-    password:
+    url: jdbc:postgresql://database:5432/secureDB
+    username: postgres
+    password: password
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: create
     show-sql: true
     properties:
       hibernate:
